@@ -1,0 +1,1886 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Dory Cosmetics — Clean Beauty for Every Skin</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="design.css"/>
+  <style>
+    /* FIX: Reusable placeholder for missing product photos.
+       It keeps the grid neat and shows the expected filename. */
+    .image-placeholder {
+      width: 100%;
+      height: 100%;
+      min-height: 72px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 14px;
+      border: 1px dashed rgba(44, 24, 16, .22);
+      background: rgba(255, 255, 255, .58);
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: .02em;
+      text-align: center;
+      word-break: break-word;
+    }
+    .product-real-image.image-placeholder {
+      object-fit: initial;
+    }
+    .search-thumb .image-placeholder,
+    .drawer-item-thumb .image-placeholder,
+    .cart-item-thumb .image-placeholder,
+    .checkout-item-thumb .image-placeholder {
+      font-size: 9px;
+      padding: 4px;
+      border-radius: inherit;
+    }
+  </style>
+</head>
+<body>
+
+
+<!-- ===================================================
+     TOAST CONTAINER
+=================================================== -->
+<div id="toast-container"></div>
+
+<!-- ===================================================
+     NAVBAR
+=================================================== -->
+<nav id="navbar">
+  <div class="container">
+    <div class="nav-inner">
+      <!-- Logo -->
+      <button class="nav-logo" onclick="showPage('home')">dory<span>.</span></button>
+
+      <!-- Desktop Links -->
+      <div class="nav-links" id="nav-links">
+        <button class="nav-link" onclick="showPage('home')">Home</button>
+        <button class="nav-link" onclick="showPage('shop')">Shop</button>
+        <button class="nav-link" onclick="showPage('home'); scrollToSection('about-section')">About</button>
+        <button class="nav-link" onclick="showPage('home'); scrollToSection('testimonials-section')">Reviews</button>
+      </div>
+
+      <!-- Actions -->
+      <div class="nav-actions">
+        <!-- Search -->
+        <div class="nav-search-wrap" style="position:relative;">
+          <svg class="nav-search-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+          <input type="text" id="nav-search" placeholder="Search products…" oninput="handleSearch(this.value)" autocomplete="off"/>
+          <button id="search-clear" onclick="clearSearch()">×</button>
+          <!-- Dropdown -->
+          <div id="search-dropdown"></div>
+        </div>
+
+        <!-- Cart -->
+        <button class="cart-btn" onclick="openCartDrawer()" aria-label="Open cart">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+          <span class="cart-count" id="cart-count" style="display:none">0</span>
+        </button>
+
+        <!-- Hamburger -->
+        <button class="hamburger" id="hamburger" onclick="toggleMobileNav()" aria-label="Menu">
+          <span></span><span></span><span></span>
+        </button>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<!-- Mobile Nav -->
+<div class="mobile-nav" id="mobile-nav">
+  <button class="nav-link" onclick="showPage('home'); closeMobileNav()">Home</button>
+  <button class="nav-link" onclick="showPage('shop'); closeMobileNav()">Shop</button>
+  <button class="nav-link" onclick="showPage('home'); scrollToSection('about-section'); closeMobileNav()">About</button>
+  <button class="nav-link" onclick="showPage('home'); scrollToSection('testimonials-section'); closeMobileNav()">Reviews</button>
+  <!-- Mobile search -->
+  <input type="text" class="form-control" placeholder="Search products…" oninput="handleSearch(this.value); showPage('shop');" style="margin-top:12px"/>
+</div>
+
+<!-- ===================================================
+     ANNOUNCEMENT BAR
+=================================================== -->
+<div class="announcement-bar">
+  <div class="marquee-track">
+    <span class="marquee-item">Free shipping over RM200</span>
+    <span class="marquee-item">Clean beauty since 2022</span>
+    <span class="marquee-item">30-day easy returns</span>
+    <span class="marquee-item">Vegan & cruelty-free</span>
+    <span class="marquee-item">New drop: Jennie × Dory Collab</span>
+    <span class="marquee-item">Free shipping over RM200</span>
+    <span class="marquee-item">Clean beauty since 2022</span>
+    <span class="marquee-item">30-day easy returns</span>
+    <span class="marquee-item">Vegan & cruelty-free</span>
+    <span class="marquee-item">New drop: Jennie × Dory Collab</span>
+  </div>
+</div>
+
+<!-- ===================================================
+     CART DRAWER
+=================================================== -->
+<div id="cart-drawer-overlay" class="overlay" style="display:none" onclick="closeCartDrawer()"></div>
+<aside id="cart-drawer" role="dialog" aria-label="Shopping cart">
+  <div class="drawer-header">
+    <div>
+      <h2>Your Bag</h2>
+      <p class="caption" id="drawer-count-label">0 items</p>
+    </div>
+    <button class="drawer-close" onclick="closeCartDrawer()">×</button>
+  </div>
+  <div class="drawer-items" id="drawer-items-list"></div>
+  <div class="drawer-footer" id="drawer-footer">
+    <div class="free-ship-bar" id="drawer-free-ship">
+      <div class="free-ship-label" id="drawer-ship-label"></div>
+      <div class="free-ship-track"><div class="free-ship-fill" id="drawer-ship-fill"></div></div>
+    </div>
+    <div class="drawer-total-row">
+      <span class="drawer-total-label">Subtotal</span>
+      <span class="drawer-total-val" id="drawer-total">RM 0</span>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:10px;margin-top:12px">
+      <button class="btn btn-dark w-full btn-lg" onclick="closeCartDrawer(); showPage('cart')">View Bag</button>
+      <button class="btn btn-primary w-full btn-lg" onclick="closeCartDrawer(); showPage('checkout')">Checkout</button>
+    </div>
+    <p class="icon-line" style="font-size:12px;color:var(--muted);text-align:center;margin-top:12px"><img src="locked.png" alt="" class="inline-icon">Secure checkout · Free returns</p>
+  </div>
+</aside>
+
+<!-- ===================================================
+     PAGE: HOME
+=================================================== -->
+<main id="page-home" class="page active">
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="container">
+      <div class="hero-inner">
+        <div class="hero-text">
+          <div class="hero-eyebrow fade-up">
+            <div class="hero-dot"></div>
+            <span class="label" style="color:var(--coral)">New · Celebrity Collab Drop</span>
+          </div>
+          <h1 class="hero-title display fade-up" style="animation-delay:.1s">
+            Beauty that<br><em>feels like</em><br>you.
+          </h1>
+          <p class="hero-sub fade-up" style="animation-delay:.2s">
+            Clean, conscious beauty crafted for every shade of you. Our celebrity collaboration with <strong style="color:var(--coral)">Jennie</strong> is finally here — limited edition, endlessly beautiful.
+          </p>
+          <div class="hero-actions fade-up" style="animation-delay:.3s">
+            <button class="btn btn-primary btn-lg" onclick="showPage('shop')">Shop the Collection</button>
+            <button class="btn btn-secondary btn-lg" onclick="openShadeQuiz()">Find My Shade</button>
+          </div>
+          <div class="hero-stats fade-up" style="animation-delay:.4s">
+            <div><div class="hero-stat-num">50K+</div><div class="hero-stat-label">Happy Customers</div></div>
+            <div><div class="hero-stat-num">98%</div><div class="hero-stat-label">Clean Formulas</div></div>
+            <div><div class="hero-stat-num">30+</div><div class="hero-stat-label">Shade Range</div></div>
+          </div>
+        </div>
+        <div class="hero-visual fade-up" style="animation-delay:.15s">
+          <div class="hero-card">
+            <img src="JenniexDory.png" alt="JenniexDory Image" class="JenniexDory"/>
+            <div class="hero-card-footer">
+              <h3>Jennie × Dory Collection</h3>
+              <p>5 exclusive shades · While stocks last</p>
+              <div style="display:flex;gap:4px;margin-top:10px">
+                <div style="width:22px;height:22px;border-radius:50%;background:#D4827E;border:2px solid rgba(255,255,255,.6)"></div>
+                <div style="width:22px;height:22px;border-radius:50%;background:#C4906A;border:2px solid rgba(255,255,255,.6);margin-left:-6px"></div>
+                <div style="width:22px;height:22px;border-radius:50%;background:#E07060;border:2px solid rgba(255,255,255,.6);margin-left:-6px"></div>
+                <div style="width:22px;height:22px;border-radius:50%;background:#9B5E6E;border:2px solid rgba(255,255,255,.6);margin-left:-6px"></div>
+                <div style="width:22px;height:22px;border-radius:50%;background:#ff5e89;border:2px solid rgba(255,255,255,.6);margin-left:-6px"></div>
+              </div>
+            </div>
+          </div>
+          <div class="hero-float-pill top-right" style="display:flex;align-items:center;gap:10px">
+            <img src="RoseGlaze.jpg" style="width:38px;height:38px;border-radius:10px;background:linear-gradient(135deg,#F8D0D0,#F5B8A8);display:flex;align-items:center;justify-content:center;font-size:20px">
+            <div>
+              <div style="font-size:12px;font-weight:600;color:var(--text)">Dewy Lip Oil</div>
+              <div style="display:flex;gap:2px;margin-top:2px" id="hero-stars"></div>
+            </div>
+          </div>
+          <div class="hero-float-pill bot-left">
+            <div style="font-size:11px;color:var(--muted);margin-bottom:3px">Most Loved</div>
+            <div style="font-family:'Cormorant Garamond',serif;font-size:18px;font-weight:600;color:var(--text)">2,847 reviews</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FEATURES BAND -->
+  <div class="features-band">
+    <div class="container">
+      <div class="features-row">
+        <div class="feature-item"><div class="feature-icon">
+          <img src="van.png" alt="Delivery" style="filter:invert(1)"/>
+        </div><div class="feature-title">Free Shipping</div><div class="feature-desc">On orders above RM200</div></div>
+        <div class="feature-item"><div class="feature-icon">
+          <img src="leaf.png" alt="100% Vegan" style="filter:invert(1)"/>
+        </div><div class="feature-title">100% Vegan</div><div class="feature-desc">Cruelty-free formulas</div></div>
+        <div class="feature-item"><div class="feature-icon">
+          <img src="repeat.png" alt="Easy Returns" style="filter:invert(1)"/>
+        </div><div class="feature-title">30-Day Returns</div><div class="feature-desc">No questions asked</div></div>
+        <div class="feature-item"><div class="feature-icon">
+          <img src="locked.png" alt="SSL Secured" style="filter:invert(1)"/>
+        </div><div class="feature-title">Secure Payment</div><div class="feature-desc">Encrypted checkout</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- FEATURED PRODUCTS -->
+  <section class="section" style="background:var(--cream)">
+    <div class="container">
+      <div class="section-header">
+        <span class="label">Our Bestsellers</span>
+        <h2 class="serif">Fan Favourites</h2>
+        <p>Discover the products our community reaches for every single day.</p>
+      </div>
+      <div class="product-grid" id="featured-grid"></div>
+      <div style="text-align:center;margin-top:40px">
+        <button class="btn btn-secondary btn-lg" onclick="showPage('shop')">View All Products →</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- EDITORIAL / COLLAB SECTION -->
+  <section class="section-lg" style="background:var(--deep);position:relative;overflow:hidden">
+    <div style="position:absolute;top:0;right:0;width:50%;height:100%;background:radial-gradient(circle at 80% 50%,rgba(232,131,106,.25) 0%,transparent 60%);pointer-events:none"></div>
+    <div class="container">
+      <div class="about-grid" style="gap:60px">
+        <div>
+          <span class="label" style="color:var(--coral);display:block;margin-bottom:18px">Celebrity Collaboration</span>
+          <h2 class="display" style="font-size:clamp(36px,5vw,58px);color:var(--white);margin-bottom:22px;line-height:1.08">
+            <em>Jennie × Dory</em><br><strong style="font-weight:600">Limited Edition</strong>
+          </h2>
+          <p style="font-size:15px;color:rgba(255,255,255,.6);line-height:1.85;margin-bottom:32px;max-width:460px">
+            South Korean singer and actress Jennie collaborated with Dory Cosmetics to create five exclusive lip oil shades inspired by her signature beauty aesthetic. Designed to deliver hydration, shine, and comfort, each shade complements a wide range of skin tones and everyday looks.
+          </p>
+          <div style="display:flex;align-items:center;gap:12px;margin-bottom:32px">
+            <div style="display:flex">
+              <div style="width:34px;height:34px;border-radius:50%;background:#D4827E;border:3px solid rgba(255,255,255,.2)"></div>
+              <div style="width:34px;height:34px;border-radius:50%;background:#C4906A;border:3px solid rgba(255,255,255,.2);margin-left:-10px"></div>
+              <div style="width:34px;height:34px;border-radius:50%;background:#E07060;border:3px solid rgba(255,255,255,.2);margin-left:-10px"></div>
+              <div style="width:34px;height:34px;border-radius:50%;background:#9B5E6E;border:3px solid rgba(255,255,255,.2);margin-left:-10px"></div>
+              <div style="width:34px;height:34px;border-radius:50%;background:#ff5e89;border:3px solid rgba(255,255,255,.2);margin-left:-10px"></div>
+            </div>
+            <span style="font-size:13px;color:rgba(255,255,255,.4)">5 exclusive shades</span>
+          </div>
+          <button class="btn btn-primary btn-lg" onclick="showPage('shop')">Shop the Collab →</button>
+        </div>
+        <div style="position:relative;display:flex;justify-content:center">
+  <div style="width:min(320px,80vw);height:420px;border-radius:48px;overflow:hidden;position:relative;box-shadow:0 40px 80px rgba(232,131,106,.35);animation:float 7s ease-in-out infinite">
+    
+    <img 
+      src="Jennie.jpg" 
+      alt="Jennie"
+      style="width:100%;height:100%;object-fit:cover;display:block"
+    >
+
+    <div style="position:relative;display:flex;justify-content:center">
+
+  <div style="position:relative;width:min(320px,80vw);height:420px">
+
+  <div style="width:100%;height:100%;border-radius:48px;overflow:hidden;position:relative">
+    <img 
+      src="Jennie.jpg" 
+      alt="Jennie"
+      style="width:100%;height:100%;object-fit:cover;display:block"
+    >
+
+    <div style="position:absolute;bottom:0;left:0;right:0;background:linear-gradient(transparent,rgba(44,24,16,.8));padding:28px">
+      <div style="font-family:'Cormorant Garamond',serif;font-size:20px;color:var(--white);font-style:italic">Jennie</div>
+      <div style="font-size:12px;color:rgba(255,255,255,.55)">Brand Ambassador · 2025</div>
+    </div>
+  </div>
+
+</div>
+
+</div>
+  </section>
+
+  <!-- ABOUT -->
+  <section class="section" id="about-section" style="background:var(--cream)">
+    <div class="container">
+      <div class="about-grid">
+        <div class="about-visual">
+          <img src="about-visual.jpg" alt="Our Story" style="width:100%;height:100%;object-fit:cover;border-radius:20px;box-shadow:0 20px 60px rgba(232,131,106,.2)"/>
+        </div>
+        <div>
+          <span class="label" style="color:var(--coral);display:block;margin-bottom:14px">Our Story</span>
+          <h2 class="serif" style="font-size:clamp(30px,4vw,46px);color:var(--text);margin-bottom:18px">Beauty with<br>intention.</h2>
+          <p style="font-size:15px;color:var(--muted);line-height:1.85;margin-bottom:20px">
+            Dory Cosmetics was born from a simple belief: that beauty should be clean, inclusive, and joyful. We create products with skin-loving ingredients that perform beautifully across every skin tone — because everyone deserves to feel radiant in their own skin.
+          </p>
+          <p style="font-size:15px;color:var(--muted);line-height:1.85;margin-bottom:32px">
+            Based in Malaysia, we blend modern science with natural botanicals to craft formulas that nourish as much as they beautify.
+          </p>
+          <div class="about-values">
+            <div class="about-value-card"><div class="about-value-icon"><img src="cruelty-free.png" alt="Vegan"/></div><div class="about-value-title">100% Vegan</div><div class="about-value-desc">No animal-derived ingredients, ever.</div></div>
+            <div class="about-value-card"><div class="about-value-icon"><img src="make-up-bag.png" alt="Dermatologist Tested"/></div><div class="about-value-title">Dermatologist Tested</div><div class="about-value-desc">Safe for sensitive skin types.</div></div>
+            <div class="about-value-card"><div class="about-value-icon"><img src="recycle-symbol.png" alt="Sustainable"/></div><div class="about-value-title">Sustainable</div><div class="about-value-desc">Eco-conscious packaging always.</div></div>
+            <div class="about-value-card"><div class="about-value-icon"><img src="ethical.png" alt="Inclusive"/></div><div class="about-value-title">Inclusive</div><div class="about-value-desc">Shades for every skin tone.</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- TESTIMONIALS -->
+  <section class="section" id="testimonials-section" style="background:var(--warm)">
+    <div class="container">
+      <div class="section-header">
+        <span class="label">Community Love</span>
+        <h2 class="serif">Loved by thousands</h2>
+        <p>Real reviews from our amazing community.</p>
+      </div>
+      <div class="testimonials-grid" id="testimonials-grid"></div>
+    </div>
+  </section>
+
+  <!-- SHADE QUIZ CTA -->
+  <section class="cta-band">
+    <div class="container">
+      <img src="make-up-bag.png" alt="" class="cta-icon">
+      <h2 class="serif" style="font-size:clamp(30px,4vw,48px);color:var(--text);margin-bottom:14px">Not sure which shade is yours?</h2>
+      <p style="font-size:15px;color:var(--muted);max-width:480px;margin:0 auto;line-height:1.75">Our Shade Match Finder uses your skin tone and type to recommend the perfect match — so you get it right first time.</p>
+      <div style="margin-top:32px"><button class="btn btn-primary btn-lg" onclick="openShadeQuiz()">Take the Shade Quiz →</button></div>
+    </div>
+  </section>
+
+  <!-- NEWSLETTER -->
+  <section class="section" style="background:var(--deep)">
+    <div class="container text-center">
+      <span class="label" style="color:var(--coral-light);display:block;margin-bottom:12px">Join the Club</span>
+      <h2 class="serif" style="color:var(--white);font-size:clamp(28px,4vw,42px);margin-bottom:10px">Get early access to drops</h2>
+      <p style="color:rgba(255,255,255,.5);font-size:14px">New launches, exclusive discounts and beauty tips — straight to your inbox.</p>
+      <form class="newsletter-form" onsubmit="handleNewsletter(event)">
+        <input type="email" class="newsletter-input" placeholder="your@email.com" required/>
+        <button type="submit" class="btn btn-primary">Subscribe</button>
+      </form>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div>
+          <div class="footer-logo">dory<span>.</span></div>
+          <p class="footer-about">Clean beauty for every skin tone. Vegan, cruelty-free, and made with love in Malaysia.</p>
+          <div class="footer-socials">
+            <button class="footer-social">Instagram</button>
+            <button class="footer-social">TikTok</button>
+            <button class="footer-social">YouTube</button>
+          </div>
+        </div>
+        <div>
+          <div class="footer-col-title">Shop</div>
+          <div class="footer-links">
+            <button class="footer-link" onclick="showPage('shop');filterByCategory('lip-oil')">Lip Oil</button>
+            <button class="footer-link" onclick="showPage('shop');filterByCategory('foundation')">Foundation</button>
+            <button class="footer-link" onclick="showPage('shop');filterByCategory('blush')">Blush</button>
+            <button class="footer-link" onclick="showPage('shop');filterByCategory('concealer')">Concealer</button>
+            <button class="footer-link" onclick="showPage('shop');filterByCategory('skincare')">Skincare</button>
+          </div>
+        </div>
+        <div>
+          <div class="footer-col-title">Help</div>
+          <div class="footer-links">
+            <button class="footer-link" onclick="openShadeQuiz()">Shade Finder</button>
+            <button class="footer-link">Track Order</button>
+            <button class="footer-link">Returns Policy</button>
+            <button class="footer-link">Shipping Info</button>
+            <button class="footer-link">FAQ</button>
+          </div>
+        </div>
+        <div>
+          <div class="footer-col-title">About</div>
+          <div class="footer-links">
+            <button class="footer-link" onclick="scrollToSection('about-section')">Our Story</button>
+            <button class="footer-link">Sustainability</button>
+            <button class="footer-link">Careers</button>
+            <button class="footer-link">Press</button>
+            <button class="footer-link">Contact Us</button>
+          </div>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <p>© 2025 Dory Cosmetics. All rights reserved.</p>
+        <p>Privacy Policy · Terms of Service · Cookie Settings</p>
+      </div>
+    </div>
+  </footer>
+</main>
+
+<!-- ===================================================
+     PAGE: SHOP
+=================================================== -->
+<main id="page-shop" class="page">
+  <div class="shop-header">
+    <div class="container">
+      <h1 class="serif">Our Collection</h1>
+      <p>Clean beauty, every shade of you.</p>
+    </div>
+  </div>
+  <section class="section" style="padding-top:40px">
+    <div class="container">
+      <div class="category-bar" id="shop-category-bar">
+        <button class="cat-btn active" onclick="filterByCategory('all',this)">All Products</button>
+        <button class="cat-btn" onclick="filterByCategory('lip-oil',this)">Lip Oil</button>
+        <button class="cat-btn" onclick="filterByCategory('foundation',this)">Foundation</button>
+        <button class="cat-btn" onclick="filterByCategory('concealer',this)">Concealer</button>
+        <button class="cat-btn" onclick="filterByCategory('blush',this)">Blush</button>
+        <button class="cat-btn" onclick="filterByCategory('skincare',this)">Skincare</button>
+      </div>
+      <div class="shop-toolbar">
+        <span class="shop-count" id="shop-count"><strong>0</strong> products</span>
+        <div class="filter-bar">
+          <div class="price-filter">
+            <span>Price:</span>
+            <div class="price-range">
+              <input type="number" id="price-min" placeholder="Min" oninput="applyFilters()" min="0"/>
+              <span>–</span>
+              <input type="number" id="price-max" placeholder="Max" oninput="applyFilters()" min="0"/>
+            </div>
+          </div>
+          <select class="sort-select" id="sort-select" onchange="applyFilters()">
+            <option value="default">Sort: Featured</option>
+            <option value="price-asc">Price: Low to High</option>
+            <option value="price-desc">Price: High to Low</option>
+            <option value="rating">Top Rated</option>
+            <option value="newest">Newest</option>
+          </select>
+        </div>
+      </div>
+      <div class="product-grid" id="shop-grid"></div>
+      <div id="shop-no-results" class="no-results hidden">
+        <h3>No products found</h3>
+        <p>Try adjusting your search or filters.</p>
+        <button class="btn btn-secondary" style="margin-top:16px" onclick="resetFilters()">Clear Filters</button>
+      </div>
+    </div>
+  </section>
+  <footer class="footer" style="margin-top:0">
+    <div class="container">
+      <div class="footer-bottom">
+        <p>© 2025 Dory Cosmetics</p>
+        <p>Privacy · Terms · Returns</p>
+      </div>
+    </div>
+  </footer>
+</main>
+
+<!-- ===================================================
+     PAGE: PRODUCT DETAIL
+=================================================== -->
+<main id="page-detail" class="page">
+  <div class="container">
+    <div class="product-detail-grid" id="detail-content"></div>
+    <div id="detail-reviews-section"></div>
+    <div id="detail-recommended" style="padding-bottom:60px"></div>
+  </div>
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-bottom">
+        <p>© 2025 Dory Cosmetics</p>
+        <p>Privacy · Terms · Returns</p>
+      </div>
+    </div>
+  </footer>
+</main>
+
+<!-- ===================================================
+     PAGE: CART
+=================================================== -->
+<main id="page-cart" class="page">
+  <div class="cart-page-header">
+    <div class="container">
+      <h1 class="serif">Your Bag</h1>
+    </div>
+  </div>
+  <div class="container">
+    <div id="cart-page-content"></div>
+  </div>
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-bottom">
+        <p>© 2025 Dory Cosmetics</p>
+        <p>Privacy · Terms · Returns</p>
+      </div>
+    </div>
+  </footer>
+</main>
+
+<!-- ===================================================
+     PAGE: CHECKOUT
+=================================================== -->
+<main id="page-checkout" class="page checkout-page">
+  <div class="checkout-page-header">
+    <div class="container">
+      <h1 class="serif">Checkout</h1>
+      <div style="display:flex;gap:6px;align-items:center;margin-top:10px">
+        <span style="width:8px;height:8px;border-radius:50%;background:var(--coral)"></span>
+        <span style="font-size:12px;color:var(--muted)">Shipping</span>
+        <span style="font-size:12px;color:var(--sand)">──</span>
+        <span style="width:8px;height:8px;border-radius:50%;background:var(--sand)"></span>
+        <span style="font-size:12px;color:var(--muted)">Payment</span>
+        <span style="font-size:12px;color:var(--sand)">──</span>
+        <span style="width:8px;height:8px;border-radius:50%;background:var(--sand)"></span>
+        <span style="font-size:12px;color:var(--muted)">Confirm</span>
+      </div>
+    </div>
+  </div>
+  <div class="container">
+    <div class="checkout-layout">
+      <!-- Form -->
+      <div>
+        <!-- Shipping -->
+        <div class="checkout-form-section">
+          <div class="checkout-section-title"><span class="checkout-section-num">1</span> Shipping Information</div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Full Name *</label>
+              <input type="text" id="ship-name" class="form-control" placeholder="Aishah Rahman"/>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Phone Number *</label>
+              <input type="tel" id="ship-phone" class="form-control" placeholder="+60 12-345 6789"/>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Email Address *</label>
+            <input type="email" id="ship-email" class="form-control" placeholder="you@email.com"/>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Street Address *</label>
+            <input type="text" id="ship-address" class="form-control" placeholder="No. 12, Jalan Bunga Raya"/>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">City *</label>
+              <input type="text" id="ship-city" class="form-control" placeholder="Kuala Lumpur"/>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Postal Code *</label>
+              <input type="text" id="ship-postal" class="form-control" placeholder="50480"/>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">State</label>
+            <select id="ship-state" class="form-control">
+              <option value="">Select state</option>
+              <option>Kuala Lumpur</option><option>Selangor</option><option>Johor</option>
+              <option>Penang</option><option>Perak</option><option>Sabah</option>
+              <option>Sarawak</option><option>Negeri Sembilan</option><option>Pahang</option>
+              <option>Kelantan</option><option>Terengganu</option><option>Kedah</option>
+              <option>Perlis</option><option>Melaka</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Payment -->
+        <div class="checkout-form-section">
+          <div class="checkout-section-title"><span class="checkout-section-num">2</span> Payment Method</div>
+          <div class="payment-options">
+            <div class="payment-opt selected" onclick="selectPayment('card',this)">
+              <div class="payment-opt-radio"></div>
+              <div>
+                <div class="payment-opt-label"><img src="locked.png" alt="" class="inline-icon">Credit / Debit Card</div>
+                <div class="payment-opt-desc">Visa, Mastercard, AmEx accepted</div>
+              </div>
+            </div>
+            <div class="payment-opt" onclick="selectPayment('cod',this)">
+              <div class="payment-opt-radio"></div>
+              <div>
+                <div class="payment-opt-label"><img src="van.png" alt="" class="inline-icon">Cash on Delivery</div>
+                <div class="payment-opt-desc">Pay when your order arrives</div>
+              </div>
+            </div>
+            <div class="payment-opt" onclick="selectPayment('ewallet',this)">
+              <div class="payment-opt-radio"></div>
+              <div>
+                <div class="payment-opt-label"><img src="ethical.png" alt="" class="inline-icon">e-Wallet</div>
+                <div class="payment-opt-desc">Touch 'n Go, GrabPay, Boost</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Card fields -->
+          <div class="card-fields" id="card-fields">
+            <div class="form-group">
+              <label class="form-label">Card Number</label>
+              <input type="text" id="card-number" class="form-control" placeholder="1234 5678 9012 3456" maxlength="19" oninput="formatCardNum(this)"/>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label">Expiry Date</label>
+                <input type="text" id="card-expiry" class="form-control" placeholder="MM / YY" maxlength="7" oninput="formatExpiry(this)"/>
+              </div>
+              <div class="form-group">
+                <label class="form-label">CVV</label>
+                <input type="text" id="card-cvv" class="form-control" placeholder="123" maxlength="4"/>
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Name on Card</label>
+              <input type="text" id="card-name" class="form-control" placeholder="AISHAH RAHMAN"/>
+            </div>
+            <div style="display:flex;gap:12px;align-items:center;padding:10px 0;border-top:1px solid var(--sand);margin-top:8px">
+              <img src="locked.png" alt="" class="inline-icon">
+              <span style="font-size:12px;color:var(--muted)">Your payment information is encrypted and secure. We never store your card details.</span>
+            </div>
+          </div>
+
+          <!-- COD message -->
+          <div id="cod-msg" class="hidden" style="background:var(--beige);border-radius:var(--radius-sm);padding:16px 20px">
+            <p class="icon-line" style="font-size:14px;color:var(--muted)"><img src="van.png" alt="" class="inline-icon">Your order will be delivered to your address. Payment is collected upon delivery. Please have the exact amount ready.</p>
+          </div>
+          <!-- eWallet message -->
+          <div id="ewallet-msg" class="hidden" style="background:var(--beige);border-radius:var(--radius-sm);padding:16px 20px">
+            <p class="icon-line" style="font-size:14px;color:var(--muted)"><img src="ethical.png" alt="" class="inline-icon">You will be redirected to complete payment via your preferred e-wallet after placing your order.</p>
+          </div>
+        </div>
+
+        <!-- Place Order -->
+        <button class="btn btn-primary w-full btn-lg" onclick="placeOrder()" id="place-order-btn" style="font-size:16px;height:58px">
+          Place Order
+        </button>
+        <p style="text-align:center;font-size:12px;color:var(--muted);margin-top:12px">By placing your order, you agree to our <a href="#" style="color:var(--coral)">Terms of Service</a> and <a href="#" style="color:var(--coral)">Privacy Policy</a>.</p>
+      </div>
+
+      <!-- Order Summary -->
+      <div>
+        <div class="checkout-summary">
+          <h3>Order Summary</h3>
+          <div id="checkout-summary-items"></div>
+          <div class="checkout-totals">
+            <div class="checkout-total-row"><span>Subtotal</span><span id="checkout-subtotal">RM 0</span></div>
+            <div class="checkout-total-row"><span>Shipping</span><span id="checkout-shipping">RM 10</span></div>
+            <div class="checkout-total-row"><span>Discount</span><span id="checkout-discount" style="color:var(--success)">— RM 0</span></div>
+            <div class="checkout-total-row grand"><span>Total</span><span class="val" id="checkout-total">RM 0</span></div>
+          </div>
+          <div style="margin-top:16px;padding:12px;background:var(--beige);border-radius:var(--radius-sm)">
+            <p class="icon-line" style="font-size:12px;color:var(--muted)"><img src="van.png" alt="" class="inline-icon">Spend RM200+ for free shipping!</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<!-- ===================================================
+     PAGE: ORDER CONFIRMATION
+=================================================== -->
+<main id="page-confirmation" class="page">
+  <div class="confirmation-page">
+    <div class="confirmation-card" id="confirmation-content"></div>
+  </div>
+</main>
+
+<!-- ===================================================
+     SHADE QUIZ MODAL
+=================================================== -->
+<div id="quiz-overlay" class="overlay hidden" onclick="closeShadeQuiz()"></div>
+<div id="quiz-modal" style="display:none;position:fixed;inset:0;z-index:1002;display:none;align-items:center;justify-content:center;padding:20px">
+  <div style="background:var(--white);border-radius:28px;width:min(580px,100%);max-height:90vh;overflow-y:auto;box-shadow:var(--shadow-lg);animation:scaleIn .4s var(--transition)" id="quiz-card">
+    <div id="quiz-content"></div>
+  </div>
+</div>
+
+<script>
+/* =============================================
+   DATA
+============================================= */
+/* =============================================================
+   PRODUCTS DATA
+   FIX: Added "image" property to every product and every shade.
+        These filenames are what the browser will try to load.
+        If a file doesn't exist, imgError() shows a clean
+        placeholder box with the filename instead.
+   ============================================================= */
+const PRODUCTS = [
+  {
+    id: 1, name: "Dewy Lip Oil", category: "lip-oil",
+    tagline: "Plumping glass-lip finish",
+    price: 89, originalPrice: null, badge: "Bestseller",
+    /* Main product image used on the card and detail page */
+    image: "lipstick.jpg",
+    gallery: ["IMG_5557.JPG","IMG_5559.PNG"],
+    gradient: "linear-gradient(135deg,#FDE8E0 0%,#F2C4B2 100%)",
+    rating: 4.9, reviewCount: 2847, isNew: false, featured: true,
+    description: "A weightless, non-sticky formula that delivers intense hydration and a coveted glossy finish. Infused with rosehip oil, vitamin E, and hyaluronic acid for nourishment that lasts all day. Perfect for a plump, glass-lip look.",
+    ingredients: ["Rosehip Oil","Vitamin E","Hyaluronic Acid","Jojoba Seed Oil","Shea Butter","Vitamin C"],
+    /* FIX: Added "image" to every shade. Previously only shade lp1
+       had an image; all others were missing it, causing "undefined"
+       when changeShadeImage() tried to load them. */
+    shades: [
+      {id:"lp1", name:"Rose Glaze",  hex:"#D4827E", image:"RoseGlaze.jpg"},
+      {id:"lp2", name:"Nude Veil",   hex:"#C4906A", image:"NudeBrown.jpg"},
+      {id:"lp3", name:"Coral Kiss",  hex:"#E07060", image:"CoralKiss.jpg"},
+      {id:"lp4", name:"Berry Dew",   hex:"#9B5E6E", image:"BerryDew.jpg"},
+      {id:"lp5", name:"Stellar Strawberry",  hex:"#ff5e89", image:"StellarStrawberry.jpg"}
+    ],
+    skinTones: ["#F5E0D0","#EAC8A8","#C89060","#9B6840","#5C3018"],
+    reviews: [
+      {name:"Aisyah R.",rating:5,date:"2 days ago",text:"The lip oil is absolutely incredible. I've tried every formula on the market and this is the one. Plumps, hydrates and the shade range is *chef's kiss*.",verified:true},
+      {name:"Mei Lin T.",rating:5,date:"1 week ago",text:"Perfect for everyday wear. So comfortable and not sticky at all!",verified:true},
+      {name:"Priya K.",rating:4,date:"3 days ago",text:"Love the Rose Glaze shade on my deeper skin tone. Great formula.",verified:false}
+    ]
+  },
+  {
+    id: 2, name: "Soft Radiance Foundation", category: "foundation",
+    tagline: "Buildable coverage, skin-like finish",
+    /* FIX: Added "image" — was missing entirely on this product */
+    image: "Porcelain 10N.jpg",
+    gallery: ["IMG_5233.jpg","IMG_5562.jpg","IMG_5561.jpg"],
+    price: 149, originalPrice: 180, badge: "New",
+    gradient: "linear-gradient(135deg,#E8D5C4 0%,#F7EDE6 100%)",
+    rating: 4.7, reviewCount: 1203, isNew: true, featured: true,
+    description: "A breathable, medium-to-full coverage foundation that feels invisible on skin. Formulated with skincare actives including niacinamide and peptides to improve skin over time. SPF 20 protection built in.",
+    ingredients: ["Niacinamide 4%","Hyaluronic Acid","Peptide Complex","SPF 20","Squalane","Vitamin C Derivative"],
+    /* FIX: Added "image" to every shade */
+    shades: [
+      {id:"f1", name:"Porcelain 10N",  hex:"#F5DDD0", image:"Porcelain 10N.jpg"},
+      {id:"f2", name:"Ivory 20W",      hex:"#EED0BC", image:"Ivory 20W.jpg"},
+      {id:"f3", name:"Sand 30C",       hex:"#D4A882", image:"Sand 30C.jpg"},
+      {id:"f4", name:"Warm Beige 40W", hex:"#C08060", image:"Warm Beige 40W.jpg"},
+      {id:"f5", name:"Caramel 50N",    hex:"#9B6040", image:"Caramel 50N.jpg"},
+      {id:"f6", name:"Espresso 60D",   hex:"#6B3820", image:"Espresso 60D.jpg"}
+    ],
+    skinTones: ["#F5E0D0","#EAC8A8","#C89060","#9B6840","#5C3018","#3C1A08"],
+    reviews: [
+      {name:"Sarah J.",rating:5,date:"5 days ago",text:"Foundation match was perfect after doing the shade quiz. Looks airbrushed but still like skin.",verified:true},
+      {name:"Nurul A.",rating:4,date:"2 weeks ago",text:"Great coverage and the SPF is a bonus. Lasts all day in our Malaysian humidity!",verified:true}
+    ]
+  },
+  {
+    id: 3, name: "Soft Pinch Liquid Blush", category: "blush",
+    tagline: "Weightless, buildable flush of colour",
+    /* FIX: Added "image" — was missing entirely on this product */
+    image: "blush.jpg",
+    gallery: ["IMG_5568.jpg","IMG_5565.PNG"],
+    price: 99, originalPrice: null, badge: "Fan Fave",
+    gradient: "linear-gradient(135deg,#F8D0D0 0%,#F5B8A8 100%)",
+    rating: 4.8, reviewCount: 3421, isNew: false, featured: true,
+    description: "A weightless liquid blush that blends seamlessly for a natural, just-pinched look. Long-wearing formula that moves with your skin. Infused with rose water and niacinamide for a healthy glow.",
+    ingredients: ["Glycerin","Niacinamide","Rose Water","Aloe Vera","Ceramides","Vitamin E"],
+    /* FIX: Added "image" to every shade */
+    shades: [
+      {id:"b1", name:"Joy",      hex:"#F0A090", image:"Joy.jpg"},
+      {id:"b2", name:"Grateful", hex:"#E8809C", image:"Grateful.jpg"},
+      {id:"b3", name:"Serenity", hex:"#D4A0B8", image:"Serenity.jpg"},
+      {id:"b4", name:"Courage",  hex:"#C07858", image:"Courage.jpg"}
+    ],
+    skinTones: ["#F5E0D0","#EAC8A8","#C89060","#9B6840","#5C3018"],
+    reviews: [
+      {name:"Priya K.",rating:5,date:"3 days ago",text:"The blush is so pigmented! A tiny bit goes a long way. Great on my deeper skin tone.",verified:true},
+      {name:"Zara M.",rating:5,date:"1 week ago",text:"I've been using Joy shade for months. Never going back to powder blush.",verified:true}
+    ]
+  },
+  {
+    id: 4, name: "Perfect Skin Concealer", category: "concealer",
+    tagline: "Brightening under-eye coverage",
+    image: "concealer.jpg",
+    gallery: ["IMG_5564.JPG","IMG_5234.jpg"],
+    price: 109, originalPrice: null, badge: null,
+    gradient: "linear-gradient(135deg,#FBF7F4 0%,#E8D5C4 100%)",
+    rating: 4.6, reviewCount: 987, isNew: false, featured: false,
+    description: "A creamy, high-coverage concealer that brightens dark circles and covers imperfections without creasing. Infused with vitamin C and caffeine to depuff and illuminate the under-eye area.",
+    ingredients: ["Vitamin C","Caffeine","Peptide-3","Light-reflecting Pigments","Hyaluronic Acid"],
+    /* FIX: Added "image" to every shade */
+    shades: [
+      {id:"c1", name:"Petal 01", hex:"#F0D8CC", image:"Petal 01.jpg"},
+      {id:"c2", name:"Shell 03", hex:"#E4C4A8", image:"Shell 03.jpg"},
+      {id:"c3", name:"Honey 05", hex:"#CFA07A", image:"Honey 05.jpg"},
+      {id:"c4", name:"Mocha 07", hex:"#8B5A38", image:"Mocha 07.jpg"}
+    ],
+    skinTones: ["#F5E0D0","#EAC8A8","#C89060","#9B6840","#5C3018"],
+    reviews: [
+      {name:"Lili C.",rating:4,date:"4 days ago",text:"Good coverage, doesn't crease. Shell 03 is a perfect match for me.",verified:true}
+    ]
+  },
+  {
+    id: 5, name: "Barrier Repair Serum", category: "skincare",
+    tagline: "Clinical-grade skin barrier support",
+    /* FIX: Added "image" — was missing entirely on this product */
+    image: "serum.jpg",
+    gallery: ["IMG_5570.JPG","IMG_5569.JPG"],
+    price: 199, originalPrice: 240, badge: "Clinical",
+    gradient: "linear-gradient(135deg,#D8EEF0 0%,#C0D8DC 100%)",
+    rating: 4.9, reviewCount: 651, isNew: false, featured: false,
+    description: "A potent serum that restores the skin's moisture barrier with a powerhouse blend of ceramides, peptides, and multi-molecular hyaluronic acid. Clinically proven to improve skin hydration by 87% in 4 weeks.",
+    ingredients: ["Ceramide NP","Ceramide AP","Ceramide EOP","Peptide-9","Multi-molecular Hyaluronic Acid","Niacinamide 5%","Panthenol"],
+    /* FIX: Added "image" to shade */
+    shades: [{id:"sk1", name:"Universal", hex:"#B8D8D0", image:"serum.jpg"}],
+    skinTones: ["#F5E0D0","#EAC8A8","#C89060","#9B6840","#5C3018","#3C1A08"],
+    reviews: [
+      {name:"Sarah J.",rating:5,date:"5 days ago",text:"Changed my skin in 2 weeks. I've repurchased 3 times. Nothing else compares.",verified:true},
+      {name:"Aida H.",rating:5,date:"3 weeks ago",text:"My sensitive skin loves this serum. Zero irritation, huge results.",verified:true}
+    ]
+  },
+  {
+    id: 6, name: "Petal Peptide Lip Mask", category: "lip-oil",
+    tagline: "Overnight plumping treatment",
+    /* FIX: Added "image" — was missing entirely on this product */
+    image: "lipmask.jpg",
+    gallery: ["IMG_5238.jpg","IMG_5237.jpg"],
+    price: 79, originalPrice: null, badge: "New",
+    gradient: "linear-gradient(135deg,#FCE4DC 0%,#F5C8C0 100%)",
+    rating: 4.8, reviewCount: 445, isNew: true, featured: false,
+    description: "Sleep your way to softer, fuller lips. This overnight treatment repairs and plumps while you rest, delivering a visible difference you'll notice the next morning. Fragrance-free and gentle enough for daily use.",
+    ingredients: ["Peptide Complex","Rosehip Butter","Vitamin E","Squalane","Rose Extract","Collagen-boosting Actives"],
+    /* FIX: Added "image" to every shade */
+    shades: [
+      {id:"lm1", name:"Natural",   hex:"#F5D0C0", image:"Natural.jpg"},
+      {id:"lm2", name:"Rose Tint", hex:"#E8A8A0", image:"Rose Tint.jpg"}
+    ],
+    skinTones: ["#F5E0D0","#EAC8A8","#C89060","#9B6840","#5C3018"],
+    reviews: [
+      {name:"Farah N.",rating:5,date:"1 week ago",text:"Woke up with the softest lips of my life. This mask is unreal.",verified:true}
+    ]
+  }
+];
+
+const TESTIMONIALS = [
+  {name:"Aisyah R.",rating:5,date:"2 days ago",text:"The lip oil is absolutely incredible. I've tried every formula on the market and this is the one. Plumps, hydrates and the shade range is chef's kiss.",verified:true,product:"Dewy Lip Oil"},
+  {name:"Mei Lin T.",rating:5,date:"1 week ago",text:"Foundation match was perfect after doing the shade quiz. The coverage is buildable and my skin looks airbrushed but still like skin. Love.",verified:true,product:"Soft Radiance Foundation"},
+  {name:"Priya K.",rating:4,date:"3 days ago",text:"The blush is so pigmented! A tiny bit goes a long way. I love that it's actually wearable on my deeper skin tone without looking muddy.",verified:true,product:"Soft Pinch Liquid Blush"},
+  {name:"Sarah J.",rating:5,date:"5 days ago",text:"The serum changed my skin in 2 weeks. I've repurchased 3 times. Nothing else compares. Bought a set for my mum too.",verified:true,product:"Barrier Repair Serum"}
+];
+
+/* =============================================
+   STATE
+============================================= */
+let cart = JSON.parse(localStorage.getItem('dory_cart') || '[]');
+let reviews = JSON.parse(localStorage.getItem('dory_reviews') || '{}');
+let currentPage = 'home';
+let currentProduct = null;
+let selectedPayment = 'card';
+let shopCategory = 'all';
+let shopSearch = '';
+let shopPriceMin = 0;
+let shopPriceMax = Infinity;
+let shopSort = 'default';
+let detailQty = 1;
+let detailShade = null;
+let detailGalleryIndex = 0;
+let quizStep = 0;
+let quizAnswers = {};
+const QUIZ_QUESTIONS = [
+  {q:"What's your skin tone?",sub:"Helps us match foundation & concealer",opts:[{id:"fair",label:"Fair",hex:"#F5E0D0"},{id:"light",label:"Light",hex:"#EAC8A8"},{id:"medium",label:"Medium",hex:"#C89060"},{id:"tan",label:"Tan",hex:"#9B6840"},{id:"deep",label:"Deep",hex:"#5C3018"}]},
+  {q:"What's your skin type?",sub:"We'll pick formulas that work for you",opts:[{id:"dry",label:"Dry",icon:"face-mask.png"},{id:"oily",label:"Oily",icon:"lotion.png"},{id:"combo",label:"Combo",icon:"facial-treatment.png"},{id:"normal",label:"Normal",icon:"hydrated-skin.png"},{id:"sensitive",label:"Sensitive",icon:"facial-treatment2.png"}]},
+  {q:"Main skin concern?",sub:"Let's target your beauty goals",opts:[{id:"hydration",label:"Hydration",icon:"hydrated-skin.png"},{id:"coverage",label:"Coverage",icon:"moisturiser.png"},{id:"glow",label:"Glow",icon:"facial-treatment3.png"},{id:"longwear",label:"Long-wear",icon:"sun-cream.png"},{id:"skincare",label:"Skincare+",icon:"lotion.png"}]}
+];
+
+/* =============================================
+   STAR SVG HELPER
+============================================= */
+function starSVG(filled){
+  return `<svg class="star ${filled?'filled':'empty'}" viewBox="0 0 12 12"><path d="M6 1l1.4 2.8 3.1.45-2.25 2.19.53 3.09L6 8.1 3.22 9.53l.53-3.09L1.5 4.25l3.1-.45z"/></svg>`;
+}
+function starsHTML(rating, max=5){
+  let h='<div class="stars">';
+  for(let i=1;i<=max;i++) h+=starSVG(i<=Math.round(rating));
+  return h+'</div>';
+}
+function iconHTML(src, alt='', className='inline-icon'){
+  return `<img src="${src}" alt="${alt}" class="${className}" onerror="this.style.display='none'">`;
+}
+
+/* =============================================
+   PRODUCT IMAGE HELPERS
+   FIX: All product image areas now use the same safe helper.
+        If an image file is missing, the browser replaces it with
+        a neat placeholder showing the expected filename instead of
+        the word "undefined".
+============================================= */
+function getProductImage(product, shade){
+  const filename = shade?.image || product?.image || `${product?.category || 'product'}.jpg`;
+  return filename || 'product.jpg';
+}
+function productImageHTML(product, className='product-real-image', shade=null){
+  const filename = getProductImage(product, shade);
+  return `<img src="${filename}" alt="${product?.name || 'Product image'}" class="${className}" onerror="showImagePlaceholder(this,'${filename}')">`;
+}
+function galleryImageHTML(product, filename, className='product-real-image'){
+  return `<img src="${filename}" alt="${product?.name || 'Product gallery image'}" class="${className}" onerror="showImagePlaceholder(this,'${filename}')">`;
+}
+function getProductGallery(product, shade){
+  const shadeImage = getProductImage(product, shade || product?.shades?.[0]);
+  const extras = product?.gallery || [];
+  return [shadeImage, ...extras].filter((filename, index, list)=>filename && list.indexOf(filename)===index);
+}
+function showImagePlaceholder(img, filename){
+  const box = document.createElement('div');
+  box.className = img.className ? `${img.className} image-placeholder` : 'image-placeholder';
+  box.textContent = filename || 'product.jpg';
+  box.setAttribute('aria-label', `Missing image placeholder for ${box.textContent}`);
+  img.replaceWith(box);
+}
+function getShadeById(productId, shadeId){
+  const product = PRODUCTS.find(p=>String(p.id)===String(productId));
+  return product?.shades.find(s=>String(s.id)===String(shadeId)) || product?.shades[0] || null;
+}
+
+/* =============================================
+   CART HELPERS
+============================================= */
+function saveCart(){ localStorage.setItem('dory_cart', JSON.stringify(cart)); }
+function cartTotal(){ return cart.reduce((s,i)=>s+i.price*i.qty,0); }
+function cartCount(){ return cart.reduce((s,i)=>s+i.qty,0); }
+function updateCartBadge(){
+  const count = cartCount();
+  const el = document.getElementById('cart-count');
+  el.textContent = count;
+  el.style.display = count > 0 ? 'flex' : 'none';
+}
+function addToCart(productId, shade, qty=1){
+  const p = PRODUCTS.find(x=>String(x.id)===String(productId));
+  if(!p) return;
+  const selectedShade = shade || p.shades[0] || null;
+  const shadeId = selectedShade?.id || 'default';
+  const shadeName = selectedShade?.name || '';
+  const shadeHex = selectedShade?.hex || '#E8836A';
+  const image = getProductImage(p, selectedShade);
+  const key = `${productId}-${shadeId}`;
+  const idx = cart.findIndex(i=>i.key===key);
+  if(idx>=0){
+    cart[idx].qty+=qty;
+    Object.assign(cart[idx], {productId:p.id,name:p.name,price:p.price,image,gradient:p.gradient,shadeId,shadeName,shadeHex});
+  }
+  /* FIX: Store image filename in the cart so cart, drawer, and
+     checkout can show the same safe image/placeholder. */
+  else { cart.push({key,productId:p.id,name:p.name,price:p.price,image,gradient:p.gradient,shadeId,shadeName,shadeHex,qty}); }
+  saveCart();
+  updateCartBadge();
+  showToast(`${p.name}${shadeName ? ` - ${shadeName}` : ''} added to your bag`, 'success', true);
+}
+function removeFromCart(key){
+  cart = cart.filter(i=>i.key!==key);
+  saveCart();
+  updateCartBadge();
+  renderDrawer();
+  if(currentPage==='cart') renderCartPage();
+  if(currentPage==='checkout') renderCheckoutSummary();
+}
+function updateQty(key, delta){
+  const idx = cart.findIndex(i=>i.key===key);
+  if(idx<0) return;
+  cart[idx].qty = Math.max(1, cart[idx].qty+delta);
+  saveCart();
+  updateCartBadge();
+  renderDrawer();
+  if(currentPage==='cart') renderCartPage();
+  if(currentPage==='checkout') renderCheckoutSummary();
+}
+
+/* =============================================
+   TOAST
+============================================= */
+function showToast(msg, type='', withViewBtn=false){
+  const c = document.getElementById('toast-container');
+  const t = document.createElement('div');
+  t.className = `toast ${type}`;
+  t.innerHTML = `<span>${msg}</span>${withViewBtn?`<button class="toast-view-btn" onclick="openCartDrawer()">View Bag</button>`:''}`;
+  c.appendChild(t);
+  setTimeout(()=>t.remove(), 2900);
+}
+
+/* =============================================
+   PAGE ROUTER
+============================================= */
+function showPage(name){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  const pg = document.getElementById(`page-${name}`);
+  if(pg){ pg.classList.add('active'); currentPage=name; }
+  window.scrollTo({top:0,behavior:'smooth'});
+  // Active nav
+  document.querySelectorAll('.nav-link').forEach(l=>l.classList.remove('active'));
+  if(name==='home') document.querySelectorAll('.nav-link')[0]?.classList.add('active');
+  if(name==='shop') document.querySelectorAll('.nav-link')[1]?.classList.add('active');
+  // Render page content
+  if(name==='cart') renderCartPage();
+  if(name==='checkout') renderCheckoutSummary();
+  if(name==='shop') renderShopGrid();
+}
+function scrollToSection(id){
+  setTimeout(()=>{
+    const el = document.getElementById(id);
+    if(el) el.scrollIntoView({behavior:'smooth', block:'start'});
+  }, 400);
+}
+
+/* =============================================
+   STAR RATING FOR HERO
+============================================= */
+function initHeroStars(){
+  const el = document.getElementById('hero-stars');
+  if(el) el.innerHTML = starsHTML(5);
+}
+
+/* =============================================
+   PRODUCT CARD HTML
+============================================= */
+function productCardHTML(p, addDelay=''){
+  const shade0 = p.shades[0] || null;
+  const swatches = p.shades.slice(0,5).map((s,i)=>
+    `<button class="swatch${i===0?' selected':''}" type="button" style="background:${s.hex}" title="${s.name}" aria-label="${s.name}" data-shade-id="${s.id}" onclick="selectCardShade(event,this,${p.id},'${s.id}')"></button>`
+  ).join('');
+  return `
+  <div class="product-card fade-up" style="animation-delay:${addDelay}" onclick="openProduct(${p.id})" data-product-id="${p.id}" data-selected-shade="${shade0?.id || ''}">
+    <div class="product-img" style="background:${p.gradient}">
+      ${productImageHTML(p, 'product-real-image', shade0)}
+      ${p.badge?`<div class="product-badge"><span class="badge ${p.badge==='Bestseller'?'badge-coral':p.badge==='New'?'badge-dark':p.badge==='Fan Fave'?'badge-nude':'badge-green'}">${p.badge}</span></div>`:''}
+      <div class="product-quick-view"><span>Quick View →</span></div>
+    </div>
+    <div class="product-body">
+      <div class="product-category">${p.category.replace('-',' ')}</div>
+      <div class="product-name">${p.name}</div>
+      <div class="product-tagline">${p.tagline}</div>
+      <div class="product-rating">
+        ${starsHTML(p.rating)}
+        <span class="product-rating-text">${p.rating} (${p.reviewCount.toLocaleString()})</span>
+      </div>
+      <div class="product-swatches" onclick="event.stopPropagation()">
+        <div class="swatch-label">${p.shades.length} shades</div>
+        <div class="swatch-row">${swatches}</div>
+      </div>
+      <div class="product-footer">
+        <div>
+          <span class="product-price">RM ${p.price}</span>
+          ${p.originalPrice?`<span class="product-price-orig">RM ${p.originalPrice}</span>`:''}
+        </div>
+        <button class="add-to-cart-btn" onclick="event.stopPropagation();addToCartFromCard(${p.id},this)">Add</button>
+      </div>
+    </div>
+  </div>`;
+}
+function selectCardShade(event, el, productId, shadeId){
+  event.stopPropagation();
+  const card = el.closest('.product-card');
+  const product = PRODUCTS.find(p=>String(p.id)===String(productId));
+  const shade = getShadeById(productId, shadeId);
+  if(!card || !product || !shade) return;
+
+  card.dataset.selectedShade = shade.id;
+  card.querySelectorAll('.swatch').forEach(x=>x.classList.toggle('selected', x.dataset.shadeId===shade.id));
+
+  const imgWrap = card.querySelector('.product-img');
+  if(imgWrap){
+    const currentImage = imgWrap.querySelector('.product-real-image, .image-placeholder');
+    currentImage?.replaceWith(document.createRange().createContextualFragment(productImageHTML(product, 'product-real-image', shade)));
+  }
+}
+function addToCartFromCard(id, btn){
+  const card = btn.closest('.product-card');
+  const selectedShadeId = card?.dataset.selectedShade || card?.querySelector('.swatch.selected')?.dataset.shadeId;
+  const shade = getShadeById(id, selectedShadeId);
+  addToCart(id, shade);
+  btn.textContent = 'Added';
+  btn.classList.add('added');
+  setTimeout(()=>{ btn.textContent='Add'; btn.classList.remove('added'); }, 1800);
+}
+
+/* =============================================
+   HOME RENDERS
+============================================= */
+function renderFeatured(){
+  const featured = PRODUCTS.filter(p=>p.featured);
+  document.getElementById('featured-grid').innerHTML = featured.map((p,i)=>productCardHTML(p,`${i*0.1}s`)).join('');
+}
+function renderTestimonials(){
+  document.getElementById('testimonials-grid').innerHTML = TESTIMONIALS.map((t,i)=>`
+    <div class="testimonial-card fade-up" style="animation-delay:${i*0.1}s">
+      <div class="testimonial-header">
+        <div>
+          <div class="testimonial-author">${t.name}</div>
+          ${t.verified?'<div class="testimonial-verified">Verified Purchase</div>':''}
+        </div>
+        <div class="testimonial-date">${t.date}</div>
+      </div>
+      ${starsHTML(t.rating)}
+      <div class="testimonial-text" style="margin-top:10px">"${t.text}"</div>
+      <div class="testimonial-product">Reviewed: ${t.product}</div>
+    </div>
+  `).join('');
+}
+
+/* =============================================
+   SHOP PAGE
+============================================= */
+function renderShopGrid(){
+  let list = [...PRODUCTS];
+  // Search
+  if(shopSearch) list = list.filter(p=>p.name.toLowerCase().includes(shopSearch.toLowerCase())||p.category.includes(shopSearch.toLowerCase()));
+  // Category
+  if(shopCategory !== 'all') list = list.filter(p=>p.category===shopCategory);
+  // Price
+  list = list.filter(p=>p.price>=shopPriceMin && p.price<=shopPriceMax);
+  // Sort
+  if(shopSort==='price-asc') list.sort((a,b)=>a.price-b.price);
+  else if(shopSort==='price-desc') list.sort((a,b)=>b.price-a.price);
+  else if(shopSort==='rating') list.sort((a,b)=>b.rating-a.rating);
+  else if(shopSort==='newest') list.sort((a,b)=>b.isNew-a.isNew);
+
+  const grid = document.getElementById('shop-grid');
+  const noRes = document.getElementById('shop-no-results');
+  const count = document.getElementById('shop-count');
+
+  if(list.length===0){
+    grid.innerHTML='';
+    noRes.classList.remove('hidden');
+    count.innerHTML='<strong>0</strong> products';
+  } else {
+    grid.innerHTML = list.map((p,i)=>productCardHTML(p,`${i*0.07}s`)).join('');
+    noRes.classList.add('hidden');
+    count.innerHTML=`<strong>${list.length}</strong> product${list.length!==1?'s':''}`;
+  }
+  // Sync sort/price UI
+  document.getElementById('sort-select').value = shopSort;
+}
+function filterByCategory(cat, btnEl){
+  shopCategory = cat;
+  document.querySelectorAll('.cat-btn').forEach(b=>b.classList.remove('active'));
+  if(btnEl) btnEl.classList.add('active');
+  else {
+    const bar = document.getElementById('shop-category-bar');
+    if(bar) bar.querySelectorAll('.cat-btn').forEach(b=>{ if(b.textContent.toLowerCase().replace(' ','').replace(' ','')===cat.replace('-','')) b.classList.add('active'); if(cat==='all' && b.textContent==='All Products') b.classList.add('active'); });
+  }
+  renderShopGrid();
+}
+function applyFilters(){
+  const min = parseFloat(document.getElementById('price-min')?.value)||0;
+  const max = parseFloat(document.getElementById('price-max')?.value)||Infinity;
+  shopPriceMin = min;
+  shopPriceMax = max || Infinity;
+  shopSort = document.getElementById('sort-select')?.value || 'default';
+  renderShopGrid();
+}
+function resetFilters(){
+  shopCategory='all'; shopSearch=''; shopPriceMin=0; shopPriceMax=Infinity; shopSort='default';
+  document.getElementById('nav-search').value='';
+  if(document.getElementById('price-min')) document.getElementById('price-min').value='';
+  if(document.getElementById('price-max')) document.getElementById('price-max').value='';
+  document.querySelectorAll('.cat-btn').forEach(b=>b.classList.remove('active'));
+  document.querySelector('.cat-btn')?.classList.add('active');
+  renderShopGrid();
+}
+
+/* =============================================
+   SEARCH
+============================================= */
+function handleSearch(val){
+  shopSearch = val;
+  const clear = document.getElementById('search-clear');
+  if(clear) clear.classList.toggle('visible', val.length>0);
+  if(val.length>0){
+    showSearchDropdown(val);
+  } else {
+    hideSearchDropdown();
+  }
+  if(currentPage==='shop') renderShopGrid();
+}
+function showSearchDropdown(val){
+  const dd = document.getElementById('search-dropdown');
+  const results = PRODUCTS.filter(p=>p.name.toLowerCase().includes(val.toLowerCase())||p.category.includes(val.toLowerCase())).slice(0,5);
+  if(results.length===0){
+    dd.innerHTML=`<div class="search-no-result">No products found for "<strong>${val}</strong>"</div>`;
+  } else {
+    dd.innerHTML = results.map(p=>`
+      <div class="search-result-item" onclick="openProduct(${p.id});hideSearchDropdown()">
+        <div class="search-thumb" style="background:${p.gradient}">${productImageHTML(p, 'product-real-image', p.shades[0])}</div>
+        <div>
+          <div class="search-result-name">${p.name.replace(new RegExp(val,'gi'),m=>`<mark style="background:var(--coral-pale);color:var(--coral)">${m}</mark>`)}</div>
+          <div class="search-result-price">RM ${p.price}</div>
+        </div>
+      </div>`).join('');
+  }
+  dd.classList.add('open');
+}
+function hideSearchDropdown(){
+  document.getElementById('search-dropdown')?.classList.remove('open');
+}
+function clearSearch(){
+  document.getElementById('nav-search').value='';
+  handleSearch('');
+}
+document.addEventListener('click',e=>{
+  if(!e.target.closest('.nav-search-wrap')) hideSearchDropdown();
+});
+
+/* =============================================
+   PRODUCT DETAIL
+============================================= */
+function openProduct(id){
+  currentProduct = PRODUCTS.find(p=>p.id===id);
+  if(!currentProduct) return;
+  detailQty = 1;
+  detailShade = currentProduct.shades[0] || null;
+  detailGalleryIndex = 0;
+  renderDetailPage();
+  showPage('detail');
+}
+function renderDetailPage(){
+  const p = currentProduct;
+  const allReviews = [...(p.reviews||[]), ...(reviews[p.id]||[])];
+  const avgRating = allReviews.length>0 ? (allReviews.reduce((s,r)=>s+r.rating,0)/allReviews.length).toFixed(1) : p.rating;
+
+  // Shade swatches
+  const swatches = p.shades.map((s,i)=>`
+    <div class="detail-swatch${i===0?' selected':''}" style="background:${s.hex}" title="${s.name}"
+      onclick="selectDetailShade('${s.id}','${s.name}',this)"
+      id="dswatch-${s.id}"></div>`).join('');
+  const gallery = getProductGallery(p, detailShade);
+  const galleryThumbs = gallery.map((filename,i)=>`
+    <button class="detail-gallery-thumb${i===0?' selected':''}" type="button" onclick="selectDetailGalleryImage(${i})" aria-label="View product photo ${i+1}">
+      ${galleryImageHTML(p, filename, 'detail-gallery-thumb-img')}
+    </button>`).join('');
+
+  // Skin tones
+  const tones = p.skinTones.map(hex=>`<div class="skin-tone-dot" style="background:${hex}" title="Works for this tone"></div>`).join('');
+
+  document.getElementById('detail-content').innerHTML = `
+    <div>
+      <div class="product-detail-visual" id="detail-visual">${galleryImageHTML(p, gallery[0])}</div>
+      <div class="detail-gallery-thumbs" id="detail-gallery-thumbs">${galleryThumbs}</div>
+    </div>
+    <div>
+      <div class="detail-breadcrumb">
+        <button onclick="showPage('home')">Home</button><span>/</span>
+        <button onclick="showPage('shop')">Shop</button><span>/</span>
+        <button onclick="showPage('shop');filterByCategory('${p.category}')">${p.category.replace('-',' ')}</button><span>/</span>
+        <span style="color:var(--text);font-weight:500">${p.name}</span>
+      </div>
+      <div class="detail-badge-row">
+        ${p.badge?`<span class="badge ${p.badge==='Bestseller'?'badge-coral':p.badge==='New'?'badge-dark':p.badge==='Fan Fave'?'badge-nude':'badge-green'}">${p.badge}</span>`:''}
+        ${p.isNew?'<span class="badge badge-beige">New Arrival</span>':''}
+      </div>
+      <h1 class="detail-name serif">${p.name}</h1>
+      <p class="detail-tagline">${p.tagline}</p>
+      <div class="detail-rating-row">
+        ${starsHTML(parseFloat(avgRating))}
+        <span class="detail-rating-count">${avgRating} · ${allReviews.length||p.reviewCount} reviews</span>
+      </div>
+      <div class="detail-price-row">
+        <span class="detail-price serif">RM ${p.price}</span>
+        ${p.originalPrice?`<span class="detail-price-orig">RM ${p.originalPrice}</span><span class="badge badge-coral" style="font-size:11px">Save RM ${p.originalPrice-p.price}</span>`:''}
+      </div>
+
+      ${p.shades.length>1?`
+      <div class="detail-shades-title">Shade: <span class="detail-shades-selected" id="shade-selected-name">${p.shades[0].name}</span> · ${p.shades.length} available</div>
+      <div class="detail-swatch-row">${swatches}</div>`:''}
+
+      <div class="detail-qty-row">
+        <span style="font-size:13px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.08em">Qty</span>
+        <div class="qty-control">
+          <button class="qty-btn" onclick="changeDetailQty(-1)">−</button>
+          <span class="qty-num" id="detail-qty-num">1</span>
+          <button class="qty-btn" onclick="changeDetailQty(1)">+</button>
+        </div>
+      </div>
+
+      <div class="detail-actions">
+        <button class="btn btn-primary btn-lg w-full" onclick="addDetailToCart()" id="detail-add-btn">Add to Bag · RM ${p.price}</button>
+        <button class="btn btn-secondary btn-icon wishlist-btn" title="Wishlist" aria-label="Add to wishlist" onclick="this.classList.toggle('active')"></button>
+      </div>
+
+      ${p.skinTones&&p.skinTones.length>0?`
+      <div style="margin-bottom:20px">
+        <div style="font-size:12px;color:var(--muted);margin-bottom:8px;font-weight:600;text-transform:uppercase;letter-spacing:.08em">Works for all skin tones</div>
+        <div class="skin-tones">${tones}</div>
+      </div>`:''}
+
+      <!-- Tabs -->
+      <div class="detail-tabs">
+        <button class="detail-tab active" onclick="switchTab('desc',this)">Description</button>
+        <button class="detail-tab" onclick="switchTab('ingredients',this)">Ingredients</button>
+        <button class="detail-tab" onclick="switchTab('reviews-tab',this)">Reviews (${allReviews.length||p.reviewCount})</button>
+      </div>
+      <div class="tab-panel active" id="tab-desc">
+        <p class="detail-desc">${p.description}</p>
+        <div class="product-values">
+          <span>${iconHTML('leaf.png','Vegan')}Vegan</span>
+          <span>${iconHTML('cruelty-free.png','Cruelty-free')}Cruelty-Free</span>
+          <span>${iconHTML('recycle-symbol.png','Eco packaging')}Eco Packaging</span>
+          <span>${iconHTML('make-up-bag.png','Dermatologist tested')}Dermatologist Tested</span>
+        </div>
+      </div>
+      <div class="tab-panel" id="tab-ingredients">
+        <p style="font-size:13px;color:var(--muted);margin-bottom:12px">Key active ingredients:</p>
+        <div class="ingredients-list">${p.ingredients.map(i=>`<span class="ingredient-pill">${i}</span>`).join('')}</div>
+        <p style="font-size:12px;color:var(--muted);margin-top:16px;line-height:1.7">Full ingredient list available on packaging. Always patch test before use. Consult a dermatologist if you have known sensitivities.</p>
+      </div>
+      <div class="tab-panel" id="tab-reviews-tab">
+        <div id="product-reviews-inline"></div>
+        <div class="review-form">
+          <h4>Write a Review</h4>
+          <div class="form-group">
+            <label class="form-label">Your Rating *</label>
+            <div class="star-input-group" id="star-input-group"></div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Your Name *</label>
+            <input type="text" id="review-name" class="form-control" placeholder="Your name"/>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Your Review *</label>
+            <textarea id="review-text" class="form-control" rows="4" placeholder="Share your experience with this product…" style="resize:vertical"></textarea>
+          </div>
+          <button class="btn btn-primary" onclick="submitReview(${p.id})">Submit Review</button>
+        </div>
+      </div>
+    </div>
+  `;
+
+  renderProductReviewsInline(p.id);
+  initStarInput();
+
+  // Recommended section
+  const recs = PRODUCTS.filter(x=>x.id!==p.id&&x.category===p.category).slice(0,3);
+  if(recs.length>0){
+    document.getElementById('detail-recommended').innerHTML=`
+      <div style="padding:40px 0 0">
+        <div class="section-header" style="margin-bottom:32px"><h2 class="serif" style="font-size:32px">You May Also Like</h2></div>
+        <div class="product-grid">${recs.map(r=>productCardHTML(r)).join('')}</div>
+      </div>`;
+  }
+}
+function selectDetailGalleryImage(index){
+  if(!currentProduct) return;
+  const gallery = getProductGallery(currentProduct, detailShade);
+  const filename = gallery[index] || gallery[0];
+  detailGalleryIndex = index;
+  const visual = document.getElementById('detail-visual');
+  if(visual&&filename) visual.innerHTML = galleryImageHTML(currentProduct, filename);
+  document.querySelectorAll('.detail-gallery-thumb').forEach((thumb,i)=>thumb.classList.toggle('selected', i===index));
+}
+function selectDetailShade(id, name, el){
+  detailShade = currentProduct.shades.find(s=>s.id===id);
+  detailGalleryIndex = 0;
+  document.querySelectorAll('.detail-swatch').forEach(s=>s.classList.remove('selected'));
+  el.classList.add('selected');
+  document.getElementById('shade-selected-name').textContent = name;
+  // FIX: Update the large detail image when a different shade is selected.
+  const visual = document.getElementById('detail-visual');
+  if(visual&&detailShade){
+    visual.style.background=`radial-gradient(circle at 60% 40%, ${detailShade.hex}60 0%, var(--beige) 70%)`;
+    const gallery = getProductGallery(currentProduct, detailShade);
+    visual.innerHTML = galleryImageHTML(currentProduct, gallery[0]);
+    const thumbs = document.getElementById('detail-gallery-thumbs');
+    if(thumbs){
+      thumbs.innerHTML = gallery.map((filename,i)=>`
+        <button class="detail-gallery-thumb${i===0?' selected':''}" type="button" onclick="selectDetailGalleryImage(${i})" aria-label="View product photo ${i+1}">
+          ${galleryImageHTML(currentProduct, filename, 'detail-gallery-thumb-img')}
+        </button>`).join('');
+    }
+  }
+}
+function changeDetailQty(d){
+  detailQty = Math.max(1, detailQty+d);
+  document.getElementById('detail-qty-num').textContent = detailQty;
+}
+function addDetailToCart(){
+  if(!currentProduct) return;
+  addToCart(currentProduct.id, detailShade, detailQty);
+  const btn = document.getElementById('detail-add-btn');
+  btn.textContent='Added to Bag!';
+  btn.style.background='var(--success)';
+  setTimeout(()=>{ btn.textContent=`Add to Bag · RM ${currentProduct.price}`; btn.style.background=''; }, 2000);
+}
+function switchTab(id, btn){
+  document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.detail-tab').forEach(b=>b.classList.remove('active'));
+  document.getElementById(`tab-${id}`)?.classList.add('active');
+  btn?.classList.add('active');
+}
+
+/* =============================================
+   REVIEWS
+============================================= */
+let starInputVal = 0;
+function initStarInput(){
+  const g = document.getElementById('star-input-group');
+  if(!g) return;
+  g.innerHTML='';
+  for(let i=1;i<=5;i++){
+    const b = document.createElement('button');
+    b.className='star-input'; b.textContent='★'; b.dataset.val=i;
+    b.onclick=()=>{ starInputVal=i; g.querySelectorAll('.star-input').forEach((x,j)=>x.classList.toggle('active',j<i)); };
+    b.onmouseenter=()=>g.querySelectorAll('.star-input').forEach((x,j)=>x.classList.toggle('active',j<i));
+    b.onmouseleave=()=>g.querySelectorAll('.star-input').forEach((x,j)=>x.classList.toggle('active',j<starInputVal));
+    g.appendChild(b);
+  }
+}
+function submitReview(productId){
+  const name = document.getElementById('review-name')?.value.trim();
+  const text = document.getElementById('review-text')?.value.trim();
+  if(!name||!text||!starInputVal){ showToast('Please fill in all fields and select a rating.','error'); return; }
+  if(!reviews[productId]) reviews[productId]=[];
+  reviews[productId].push({name,rating:starInputVal,date:'Just now',text,verified:false});
+  localStorage.setItem('dory_reviews',JSON.stringify(reviews));
+  showToast('Review submitted! Thank you','success');
+  document.getElementById('review-name').value='';
+  document.getElementById('review-text').value='';
+  starInputVal=0;
+  initStarInput();
+  renderProductReviewsInline(productId);
+}
+function renderProductReviewsInline(productId){
+  const p = PRODUCTS.find(x=>x.id===productId);
+  if(!p) return;
+  const allReviews = [...(p.reviews||[]), ...(reviews[productId]||[])];
+  const el = document.getElementById('product-reviews-inline');
+  if(!el) return;
+  if(allReviews.length===0){ el.innerHTML=`<p style="color:var(--muted);font-size:14px;padding:16px 0">No reviews yet. Be the first!</p>`; return; }
+  // Rating bars
+  const dist=[0,0,0,0,0];
+  allReviews.forEach(r=>{ if(r.rating>=1&&r.rating<=5) dist[r.rating-1]++; });
+  const avg=(allReviews.reduce((s,r)=>s+r.rating,0)/allReviews.length).toFixed(1);
+  el.innerHTML=`
+    <div class="reviews-summary" style="margin-bottom:28px;display:flex;gap:28px;flex-wrap:wrap">
+      <div style="text-align:center">
+        <div class="reviews-big-num">${avg}</div>
+        ${starsHTML(parseFloat(avg))}
+        <div style="font-size:12px;color:var(--muted);margin-top:6px">${allReviews.length} reviews</div>
+      </div>
+      <div class="reviews-bar-list" style="flex:1;min-width:160px">
+        ${[5,4,3,2,1].map(n=>`
+          <div class="reviews-bar-row">
+            <span class="reviews-bar-label">${n}</span>
+            <div class="reviews-bar-track"><div class="reviews-bar-fill" style="width:${allReviews.length>0?(dist[n-1]/allReviews.length*100):0}%"></div></div>
+            <span style="font-size:12px;color:var(--muted);width:20px">${dist[n-1]}</span>
+          </div>`).join('')}
+      </div>
+    </div>
+    ${allReviews.slice().reverse().map(r=>`
+      <div class="review-item">
+        <div class="review-top">
+          <div><div class="review-author">${r.name}${r.verified?'<span class="review-verified" style="margin-left:8px">Verified</span>':''}</div></div>
+          <div class="review-date">${r.date}</div>
+        </div>
+        ${starsHTML(r.rating)}
+        <div class="review-text">${r.text}</div>
+      </div>`).join('')}`;
+}
+
+/* =============================================
+   CART DRAWER
+============================================= */
+function openCartDrawer(){
+  document.getElementById('cart-drawer').classList.add('open');
+  document.getElementById('cart-drawer-overlay').style.display='block';
+  document.body.style.overflow='hidden';
+  renderDrawer();
+}
+function closeCartDrawer(){
+  document.getElementById('cart-drawer').classList.remove('open');
+  document.getElementById('cart-drawer-overlay').style.display='none';
+  document.body.style.overflow='';
+}
+function renderDrawer(){
+  const list = document.getElementById('drawer-items-list');
+  const footer = document.getElementById('drawer-footer');
+  const total = cartTotal();
+  const count = cartCount();
+  document.getElementById('drawer-count-label').textContent = `${count} item${count!==1?'s':''}`;
+  document.getElementById('drawer-total').textContent = `RM ${total}`;
+  // Free shipping bar
+  const freeAt=200; const pct=Math.min(total/freeAt*100,100);
+  document.getElementById('drawer-ship-fill').style.width=pct+'%';
+  document.getElementById('drawer-ship-label').textContent = total>=freeAt ? 'You have free shipping!' : `RM ${freeAt-total} away from free shipping`;
+
+  if(cart.length===0){
+    list.innerHTML=`<div style="text-align:center;padding:60px 20px">
+      <p style="font-family:'Cormorant Garamond',serif;font-size:22px;color:var(--muted)">Your bag is empty</p>
+      <p style="font-size:13px;color:var(--muted);margin-top:8px">Discover something beautiful</p>
+      <button class="btn btn-primary" style="margin-top:20px" onclick="closeCartDrawer();showPage('shop')">Shop Now</button>
+    </div>`;
+    footer.style.display='none';
+  } else {
+    footer.style.display='block';
+    list.innerHTML = cart.map(item=>`
+      <div class="drawer-item">
+        <div class="drawer-item-thumb" style="background:${item.gradient}">${productImageHTML(PRODUCTS.find(p=>p.id===item.productId), 'product-real-image', {image:item.image})}</div>
+        <div class="drawer-item-body">
+          <div class="drawer-item-name">${item.name}</div>
+          <div class="drawer-item-meta" style="display:flex;align-items:center;gap:6px">
+            <div style="width:10px;height:10px;border-radius:50%;background:${item.shadeHex};border:1px solid var(--sand)"></div>
+            ${item.shadeName}
+          </div>
+          <div class="drawer-item-footer">
+            <div class="cart-qty-ctrl">
+              <button class="cart-qty-btn" onclick="updateQty('${item.key}',-1)">−</button>
+              <span class="cart-qty-num">${item.qty}</span>
+              <button class="cart-qty-btn" onclick="updateQty('${item.key}',1)">+</button>
+            </div>
+            <div style="display:flex;align-items:center;gap:10px">
+              <span class="drawer-item-price">RM ${item.price*item.qty}</span>
+              <button class="cart-remove-btn" onclick="removeFromCart('${item.key}')">×</button>
+            </div>
+          </div>
+        </div>
+      </div>`).join('');
+  }
+}
+
+/* =============================================
+   CART PAGE
+============================================= */
+function renderCartPage(){
+  const el = document.getElementById('cart-page-content');
+  if(cart.length===0){
+    el.innerHTML=`<div class="cart-empty">
+      <h3 class="serif">Your bag is empty</h3>
+      <p>Looks like you haven't added anything yet.</p>
+      <button class="btn btn-primary btn-lg" onclick="showPage('shop')">Start Shopping</button>
+    </div>`;
+    return;
+  }
+  const total=cartTotal(); const freeAt=200; const shipping=total>=freeAt?0:10;
+  el.innerHTML=`
+    <div class="cart-layout">
+      <div>
+        <div class="cart-items-wrap">
+          <div class="cart-items-header">
+            <div class="cart-col-label">Product</div>
+            <div class="cart-col-label">Price</div>
+            <div class="cart-col-label">Quantity</div>
+            <div class="cart-col-label">Subtotal</div>
+            <div></div>
+          </div>
+          ${cart.map(item=>`
+            <div class="cart-item">
+              <div class="cart-item-info">
+                <div class="cart-item-thumb" style="background:${item.gradient}">${productImageHTML(PRODUCTS.find(p=>p.id===item.productId), 'product-real-image', {image:item.image})}</div>
+                <div>
+                  <div class="cart-item-name">${item.name}</div>
+                  <div class="cart-item-shade"><div class="cart-shade-dot" style="background:${item.shadeHex}"></div>${item.shadeName}</div>
+                </div>
+              </div>
+              <div class="cart-item-price">RM ${item.price}</div>
+              <div>
+                <div class="cart-qty-ctrl">
+                  <button class="cart-qty-btn" onclick="updateQty('${item.key}',-1)">−</button>
+                  <span class="cart-qty-num">${item.qty}</span>
+                  <button class="cart-qty-btn" onclick="updateQty('${item.key}',1)">+</button>
+                </div>
+              </div>
+              <div class="cart-item-subtotal">RM ${item.price*item.qty}</div>
+              <button class="cart-remove-btn" onclick="removeFromCart('${item.key}')">×</button>
+            </div>`).join('')}
+        </div>
+        <div style="display:flex;justify-content:space-between;margin-top:20px;flex-wrap:wrap;gap:12px">
+          <button class="btn btn-secondary" onclick="showPage('shop')">← Continue Shopping</button>
+          <button class="btn btn-ghost" onclick="if(confirm('Clear all items?')){cart=[];saveCart();updateCartBadge();renderCartPage();}">Clear Bag</button>
+        </div>
+      </div>
+      <div>
+        <div class="cart-summary-box">
+          <h3 class="serif">Order Summary</h3>
+          <div class="free-ship-bar">
+            <div class="free-ship-label">${total>=freeAt?'You have free shipping!':`RM ${freeAt-total} away from free shipping`}</div>
+            <div class="free-ship-track"><div class="free-ship-fill" style="width:${Math.min(total/freeAt*100,100)}%"></div></div>
+          </div>
+          <div class="cart-summary-row"><span>Subtotal</span><span>RM ${total}</span></div>
+          <div class="cart-summary-row"><span>Shipping</span><span>${shipping===0?'<span style="color:var(--success)">FREE</span>':'RM '+shipping}</span></div>
+          <div class="cart-promo-row">
+            <input type="text" class="cart-promo-input" placeholder="Promo code" id="promo-input"/>
+            <button class="btn btn-secondary btn-sm" onclick="applyPromo()">Apply</button>
+          </div>
+          <div class="cart-summary-row total"><span>Total</span><span class="val">RM ${total+shipping}</span></div>
+          <button class="btn btn-primary w-full btn-lg" style="margin-top:20px" onclick="showPage('checkout')">Proceed to Checkout →</button>
+          <p class="icon-line" style="font-size:12px;color:var(--muted);text-align:center;margin-top:10px">${iconHTML('locked.png','Secure checkout')}Secure checkout · Free returns within 30 days</p>
+        </div>
+      </div>
+    </div>`;
+}
+function applyPromo(){
+  const code = document.getElementById('promo-input')?.value.trim().toUpperCase();
+  if(code==='DORY10') showToast('Promo code applied! 10% off','success');
+  else showToast('Invalid promo code.','error');
+}
+
+/* =============================================
+   CHECKOUT
+============================================= */
+function renderCheckoutSummary(){
+  const items = document.getElementById('checkout-summary-items');
+  const total = cartTotal();
+  const shipping = total>=200?0:10;
+  if(!items) return;
+  items.innerHTML = cart.map(item=>`
+    <div class="checkout-item-row">
+      <div class="checkout-item-thumb" style="background:${item.gradient}">${productImageHTML(PRODUCTS.find(p=>p.id===item.productId), 'product-real-image', {image:item.image})}</div>
+      <div class="checkout-item-info">
+        <div class="checkout-item-name">${item.name}</div>
+        <div class="checkout-item-meta">${item.shadeName} · Qty ${item.qty}</div>
+      </div>
+      <div class="checkout-item-price">RM ${item.price*item.qty}</div>
+    </div>`).join('');
+  document.getElementById('checkout-subtotal').textContent=`RM ${total}`;
+  document.getElementById('checkout-shipping').textContent=shipping===0?'FREE':`RM ${shipping}`;
+  document.getElementById('checkout-total').textContent=`RM ${total+shipping}`;
+}
+function selectPayment(type, el){
+  selectedPayment=type;
+  document.querySelectorAll('.payment-opt').forEach(o=>o.classList.remove('selected'));
+  el.classList.add('selected');
+  document.getElementById('card-fields').classList.toggle('hidden',type!=='card');
+  document.getElementById('cod-msg').classList.toggle('hidden',type!=='cod');
+  document.getElementById('ewallet-msg').classList.toggle('hidden',type!=='ewallet');
+}
+function formatCardNum(input){
+  let v=input.value.replace(/\D/g,'').slice(0,16);
+  input.value=v.replace(/(.{4})/g,'$1 ').trim();
+}
+function formatExpiry(input){
+  let v=input.value.replace(/\D/g,'').slice(0,4);
+  if(v.length>2) v=v.slice(0,2)+' / '+v.slice(2);
+  input.value=v;
+}
+function validateField(id, msg){
+  const el=document.getElementById(id); if(!el) return true;
+  const ok=el.value.trim().length>0;
+  el.classList.toggle('error',!ok);
+  return ok;
+}
+function placeOrder(){
+  // Validate shipping
+  const fields=['ship-name','ship-phone','ship-email','ship-address','ship-city','ship-postal'];
+  let valid=true;
+  fields.forEach(f=>{ if(!validateField(f,'Required')) valid=false; });
+  // Email validate
+  const email=document.getElementById('ship-email')?.value;
+  if(email&&!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){
+    document.getElementById('ship-email').classList.add('error');
+    valid=false;
+  }
+  // Card validation
+  if(selectedPayment==='card'){
+    if(!validateField('card-number','')) valid=false;
+    if(!validateField('card-expiry','')) valid=false;
+    if(!validateField('card-cvv','')) valid=false;
+    if(!validateField('card-name','')) valid=false;
+  }
+  if(!valid){ showToast('Please fill in all required fields.','error'); return; }
+  if(cart.length===0){ showToast('Your cart is empty.','error'); return; }
+
+  // Show loading
+  const btn=document.getElementById('place-order-btn');
+  btn.innerHTML='<div class="spinner" style="width:24px;height:24px;margin:0;border-width:2px;border-color:rgba(255,255,255,.3);border-top-color:#fff"></div>';
+  btn.disabled=true;
+
+  setTimeout(()=>{
+    // Generate order
+    const orderId='DRY-'+Date.now().toString(36).toUpperCase();
+    const orderItems=[...cart];
+    const total=cartTotal();
+    const shipping=total>=200?0:10;
+    const name=document.getElementById('ship-name').value;
+    const email=document.getElementById('ship-email').value;
+
+    // Save order to localStorage
+    const orders=JSON.parse(localStorage.getItem('dory_orders')||'[]');
+    orders.push({orderId,items:orderItems,total:total+shipping,shipping,date:new Date().toLocaleDateString('en-MY'),name,email,payment:selectedPayment});
+    localStorage.setItem('dory_orders',JSON.stringify(orders));
+
+    // Clear cart
+    cart=[];
+    saveCart();
+    updateCartBadge();
+
+    // Show confirmation
+    renderConfirmation({orderId,items:orderItems,total:total+shipping,shipping,name});
+    showPage('confirmation');
+  },1800);
+}
+
+/* =============================================
+   ORDER CONFIRMATION
+============================================= */
+function renderConfirmation({orderId,items,total,shipping,name}){
+  const el=document.getElementById('confirmation-content');
+  el.innerHTML=`
+    <img src="make-up-bag.png" alt="" class="confirmation-icon-img">
+    <h1 class="serif" style="font-size:clamp(28px,4vw,40px);color:var(--text);margin-bottom:8px">Thank you, ${name.split(' ')[0]}!</h1>
+    <p style="font-size:15px;color:var(--muted);line-height:1.7">Your order has been placed successfully. We'll send a confirmation to your email.</p>
+    <div class="confirmation-order-id">
+      <span>Order ID</span>
+      <strong>${orderId}</strong>
+    </div>
+    <div class="confirmation-items">
+      <div style="font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:12px">Order Summary</div>
+      ${items.map(i=>`
+        <div class="confirmation-item">
+          <span class="confirmation-item-name">${i.name} <span style="color:var(--muted);font-size:12px">×${i.qty}</span></span>
+          <span class="confirmation-item-price">RM ${i.price*i.qty}</span>
+        </div>`).join('')}
+      <div class="confirmation-item">
+        <span style="color:var(--muted)">Shipping</span>
+        <span class="confirmation-item-price" style="color:var(--muted)">${shipping===0?'FREE':'RM '+shipping}</span>
+      </div>
+    </div>
+    <div class="confirmation-total">Total: <span>RM ${total}</span></div>
+    <div style="margin-top:20px;padding:16px;background:var(--beige);border-radius:var(--radius-sm);text-align:left">
+      <p style="font-size:13px;color:var(--muted);line-height:1.7">
+        <span class="icon-line">${iconHTML('van.png','Delivery')}Estimated delivery: <strong style="color:var(--text)">3–5 business days</strong></span><br>
+        <span class="icon-line">${iconHTML('mail.png','Confirmation')}Confirmation email sent.</span><br>
+        <span class="icon-line">${iconHTML('repeat.png','Returns')}Free returns within 30 days.</span>
+      </p>
+    </div>
+    <div style="display:flex;gap:12px;margin-top:28px;flex-wrap:wrap;justify-content:center">
+      <button class="btn btn-primary btn-lg" onclick="showPage('shop')">Continue Shopping</button>
+      <button class="btn btn-secondary" onclick="showPage('home')">Back to Home</button>
+    </div>`;
+}
+
+/* =============================================
+   SHADE QUIZ
+============================================= */
+function openShadeQuiz(){
+  quizStep=0; quizAnswers={};
+  const overlay=document.getElementById('quiz-overlay');
+  const modal=document.getElementById('quiz-modal');
+  overlay.classList.remove('hidden');
+  modal.style.display='flex';
+  renderQuizStep();
+}
+function closeShadeQuiz(){
+  document.getElementById('quiz-overlay').classList.add('hidden');
+  document.getElementById('quiz-modal').style.display='none';
+}
+function renderQuizStep(){
+  if(quizStep>=QUIZ_QUESTIONS.length){ renderQuizResults(); return; }
+  const q=QUIZ_QUESTIONS[quizStep];
+  const progress=(quizStep/QUIZ_QUESTIONS.length*100);
+  const selectedId = quizAnswers[quizStep]?.id || '';
+  document.getElementById('quiz-content').innerHTML=`
+    <div style="padding:32px 32px 0">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
+        <span class="label" style="color:var(--coral)">Shade Match Finder</span>
+        <button onclick="closeShadeQuiz()" style="background:none;border:none;font-size:22px;color:var(--muted);cursor:pointer;line-height:1">×</button>
+      </div>
+      <div style="height:4px;background:var(--beige);border-radius:2px;margin-bottom:24px;overflow:hidden">
+        <div style="height:100%;width:${progress}%;background:var(--coral);border-radius:2px;transition:width .4s ease"></div>
+      </div>
+      <h2 class="serif" style="font-size:28px;margin-bottom:8px;color:var(--text)">${q.q}</h2>
+      <p style="font-size:14px;color:var(--muted);margin-bottom:24px">${q.sub}</p>
+    </div>
+    <div style="padding:0 32px 32px;display:grid;grid-template-columns:repeat(auto-fill,minmax(${q.opts[0].hex?'80px':'130px'},1fr));gap:12px">
+      ${q.opts.map(o=>`
+        <button onclick="answerQuiz(${quizStep},'${o.id}')" style="background:var(--beige);border:2px solid ${selectedId===o.id?'var(--coral)':'transparent'};border-radius:14px;padding:${o.hex?'14px 10px':'14px 10px'};cursor:pointer;text-align:center;transition:all .2s;display:flex;flex-direction:column;align-items:center;gap:8px" onmouseover="this.style.borderColor='var(--coral)'" onmouseout="this.style.borderColor='${selectedId===o.id?'var(--coral)':'transparent'}'">
+          ${o.hex?`<div style="width:36px;height:36px;border-radius:50%;background:${o.hex};border:3px solid var(--white);box-shadow:0 2px 8px rgba(0,0,0,.15)"></div>`:iconHTML(o.icon||'make-up-bag.png', o.label, 'quiz-option-icon')}
+          <div>
+            <div style="font-size:13px;font-weight:600;color:var(--text)">${o.label}</div>
+            ${o.desc?`<div style="font-size:11px;color:var(--muted)">${o.desc}</div>`:''}
+          </div>
+        </button>`).join('')}
+    </div>
+    <div style="padding:0 32px 24px;text-align:center">
+      <p style="font-size:13px;color:var(--muted)">Step ${quizStep+1} of ${QUIZ_QUESTIONS.length}</p>
+      <button class="btn btn-secondary" style="margin-top:12px" onclick="validateQuizStep()">Continue</button>
+    </div>`;
+}
+function answerQuiz(step, optionId){
+  /* FIX: Look up answers from QUIZ_QUESTIONS instead of parsing JSON
+     inside an onclick string. This avoids quote/escaping errors. */
+  const question = QUIZ_QUESTIONS[step];
+  const answer = question?.opts.find(o=>o.id===optionId);
+  if(!answer){
+    showToast('Please choose an answer before continuing.','error');
+    return;
+  }
+  quizAnswers[step]=answer;
+  renderQuizStep();
+}
+function validateQuizStep(){
+  /* FIX: Prevent blank quiz submissions. The user must pick an option
+     before moving to the next question or seeing results. */
+  if(!quizAnswers[quizStep]){
+    showToast('Please choose an answer before continuing.','error');
+    return;
+  }
+  quizStep++;
+  renderQuizStep();
+}
+function renderQuizResults(){
+  /* FIX: Safe fallbacks prevent missing quiz data from causing errors. */
+  const skinTone=quizAnswers[0]?.id||'medium';
+  const concern=quizAnswers[2]?.id||'glow';
+  let recs=[];
+  if(concern==='hydration'||concern==='skincare') recs=PRODUCTS.filter(p=>p.category==='skincare'||p.category==='lip-oil');
+  else if(concern==='coverage') recs=PRODUCTS.filter(p=>p.category==='foundation'||p.category==='concealer');
+  else recs=PRODUCTS.filter(p=>p.featured);
+  recs=recs.slice(0,3);
+  if(recs.length===0) recs=PRODUCTS.filter(p=>p.featured).slice(0,3);
+
+  document.getElementById('quiz-content').innerHTML=`
+    <div style="padding:32px">
+      <div style="text-align:right"><button onclick="closeShadeQuiz()" style="background:none;border:none;font-size:22px;color:var(--muted);cursor:pointer">×</button></div>
+      <div style="text-align:center;margin-bottom:28px">
+        <img src="make-up-bag.png" alt="" class="quiz-result-icon">
+        <h2 class="serif" style="font-size:28px;color:var(--text);margin-bottom:8px">Your Perfect Match</h2>
+        <p style="font-size:14px;color:var(--muted)">Based on your <strong style="color:var(--coral)">${quizAnswers[0]?.label||'Medium'}</strong> skin tone and <strong style="color:var(--coral)">${quizAnswers[1]?.label||'Normal'}</strong> skin type, we recommend:</p>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:14px">
+        ${recs.map(p=>`
+          <div style="background:var(--warm);border-radius:14px;overflow:hidden;cursor:pointer" onclick="closeShadeQuiz();openProduct(${p.id})">
+            <div style="height:110px;background:${p.gradient};display:flex;align-items:center;justify-content:center;font-size:44px">${productImageHTML(p, 'product-real-image', p.shades[0])}</div>
+            <div style="padding:12px">
+              <div style="font-size:14px;font-weight:600;color:var(--text);margin-bottom:6px">${p.name}</div>
+              <div style="display:flex;justify-content:space-between;align-items:center">
+                <span style="font-family:'Cormorant Garamond',serif;font-size:17px;font-weight:600;color:var(--text)">RM ${p.price}</span>
+                <button class="add-to-cart-btn btn-sm" onclick="event.stopPropagation();addToCart(${p.id},null);closeShadeQuiz()">Add</button>
+              </div>
+            </div>
+          </div>`).join('')}
+      </div>
+      <div style="text-align:center;margin-top:20px">
+        <button class="btn btn-secondary" onclick="closeShadeQuiz();showPage('shop')">Browse All Products →</button>
+      </div>
+    </div>`;
+}
+
+/* =============================================
+   NEWSLETTER
+============================================= */
+function handleNewsletter(e){
+  e.preventDefault();
+  showToast('You\'re subscribed! Welcome to the Dory community','success');
+  e.target.reset();
+}
+
+/* =============================================
+   MOBILE NAV
+============================================= */
+function toggleMobileNav(){
+  document.getElementById('mobile-nav').classList.toggle('open');
+}
+function closeMobileNav(){
+  document.getElementById('mobile-nav').classList.remove('open');
+}
+
+/* =============================================
+   NAVBAR SCROLL
+============================================= */
+window.addEventListener('scroll',()=>{
+  document.getElementById('navbar').classList.toggle('scrolled',window.scrollY>40);
+});
+
+/* =============================================
+   INIT
+============================================= */
+document.addEventListener('DOMContentLoaded',()=>{
+  updateCartBadge();
+  renderFeatured();
+  renderTestimonials();
+  renderShopGrid();
+  initHeroStars();
+});
+</script>
+</body>
+</html>
